@@ -17,14 +17,14 @@ class Uri implements UriInterface{
 
 	public static function fromGlobals(): self{
 		$scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
-		if(isset($_SERVER['HTTP_HOST']) && is_string($_SERVER['HTTP_HOST'])){
-			$httpHost = $_SERVER['HTTP_HOST'];
-		}
-		if(isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI'])){
-			$requestUri = $_SERVER['REQUEST_URI'];
-		}
+		$httpHost = (isset($_SERVER['HTTP_HOST']) && is_string($_SERVER['HTTP_HOST']))
+			? $_SERVER['HTTP_HOST']
+			: 'localhost';
+		$requestUri = (isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI']))
+			? $_SERVER['REQUEST_URI']
+			: '/';
 
-		return new self($scheme . '://' . ($httpHost ?? 'localhost') . ($requestUri ?? '/'));
+		return new self($scheme . '://' . $httpHost . $requestUri);
 	}
 
 	private const CharUnreserved = 'a-zA-Z0-9_\-\.\~';
@@ -312,7 +312,7 @@ class Uri implements UriInterface{
 		}
 
 		if($port < 1 || $port > 0xffff){
-			throw new \InvalidArgumentException("Invalid port '$port'. Must be between 1 and 65535");
+			throw new \InvalidArgumentException("Invalid port '$port'. Must be between 1 and 65535.");
 		}
 
 		if(isset(self::$defaultPorts[$scheme]) && self::$defaultPorts[$scheme] === $port){

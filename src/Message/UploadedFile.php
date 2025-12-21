@@ -22,12 +22,13 @@ class UploadedFile implements UploadedFileInterface{
 				$r = [];
 				foreach(array_keys($_f['tmp_name']) as $k){
 					/** @var array{name: array<mixed>, type: array<mixed>, tmp_name: array<mixed>, error: array<mixed>, size: array<mixed>} $_f */
+
 					$r[$k] = $nf([
 						'tmp_name' => $_f['tmp_name'][$k],
 						'size' => $_f['size'][$k],
 						'error' => $_f['error'][$k],
 						'name' => $_f['name'][$k],
-						'type' => $_f['type'][$k],
+						'type' => $_f['type'][$k]
 					]);
 				}
 
@@ -35,6 +36,7 @@ class UploadedFile implements UploadedFileInterface{
 			}
 
 			/** @var array{name: string, type: string, tmp_name: string, error: int, size: int} $_f */
+
 			return new self(
 				$_f['tmp_name'],
 				(int) $_f['size'],

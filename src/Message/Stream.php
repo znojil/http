@@ -87,7 +87,7 @@ class Stream implements StreamInterface{
 		$resource = $this->resource;
 
 		$this->resource = null;
-		$this->readable= $this->writable = $this->seekable = false;
+		$this->readable = $this->writable = $this->seekable = false;
 
 		return $resource;
 	}

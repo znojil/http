@@ -8,9 +8,9 @@ use Psr\Http\Message as PsrMessage;
 class ServerRequest extends Request implements PsrMessage\ServerRequestInterface{
 
 	public static function fromGlobals(): self{
-		if(isset($_SERVER['REQUEST_METHOD']) && is_string($_SERVER['REQUEST_METHOD'])){
-			$requestMethod = $_SERVER['REQUEST_METHOD'];
-		}
+		$requestMethod = (isset($_SERVER['REQUEST_METHOD']) && is_string($_SERVER['REQUEST_METHOD']))
+			? $_SERVER['REQUEST_METHOD']
+			: 'GET';
 
 		$headers = [];
 		if(function_exists('getallheaders')){
@@ -23,18 +23,18 @@ class ServerRequest extends Request implements PsrMessage\ServerRequestInterface
 			}
 		}
 
-		if(isset($_SERVER['SERVER_PROTOCOL']) && is_string($_SERVER['SERVER_PROTOCOL'])){
-			$serverProtocol = $_SERVER['SERVER_PROTOCOL'];
-		}
+		$serverProtocol = (isset($_SERVER['SERVER_PROTOCOL']) && is_string($_SERVER['SERVER_PROTOCOL']))
+			? substr(strtoupper($_SERVER['SERVER_PROTOCOL']), 5)
+			: '1.1';
 
 		/** @var array<string, string|string[]> $headers */
 
 		$serverRequest = new self(
-			$requestMethod ?? 'GET',
+			$requestMethod,
 			Uri::fromGlobals(),
 			$headers,
 			fopen('php://input', 'r'),
-			isset($serverProtocol) ? substr(strtoupper($serverProtocol), 5) : '1.1',
+			$serverProtocol,
 			$_SERVER
 		);
 
