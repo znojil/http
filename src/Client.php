@@ -12,7 +12,7 @@ class Client implements \Psr\Http\Client\ClientInterface{
 	private readonly PsrMessage\ResponseFactoryInterface $responseFactory;
 
 	/** @var array<int, mixed> */
-	private array $defaultOptions = [
+	private array $defaultCurlOptions = [
 		CURLOPT_CONNECTTIMEOUT => 10,
 		CURLOPT_FOLLOWLOCATION => true,
 		CURLOPT_HEADER => false,
@@ -24,23 +24,23 @@ class Client implements \Psr\Http\Client\ClientInterface{
 
 	/**
 	 * @param array<string, string|string[]> $defaultHeaders
-	 * @param array<int, mixed> $defaultOptions
+	 * @param array<int, mixed> $defaultCurlOptions default options for curl_setopt_array() (e.g. CURLOPT_USERAGENT => 'Znojil Http client')
 	 */
 	public function __construct(
 		string|Message\Uri|null $baseUri = null,
 		private readonly array $defaultHeaders = [],
-		array $defaultOptions = [],
+		array $defaultCurlOptions = [],
 		?PsrMessage\ResponseFactoryInterface $responseFactory = null
 	){
 		$this->baseUri = $baseUri !== null ? new Message\Uri($baseUri) : null;
-		$this->defaultOptions = array_replace($this->defaultOptions, $defaultOptions);
+		$this->defaultCurlOptions = array_replace($this->defaultCurlOptions, $defaultCurlOptions);
 		$this->responseFactory = $responseFactory ?? new Psr17Factory;
 	}
 
 	/**
-	 * @param array<int, mixed> $options
+	 * @param array<int, mixed> $curlOptions options for curl_setopt_array() (e.g. CURLOPT_TIMEOUT => 5)
 	 */
-	public function sendRequest(PsrMessage\RequestInterface $request, array $options = []): PsrMessage\ResponseInterface{
+	public function sendRequest(PsrMessage\RequestInterface $request, array $curlOptions = []): PsrMessage\ResponseInterface{
 		if(!($ch = curl_init())){
 			throw new Exception\ClientException('Failed to initialize cURL resource.');
 		}
@@ -52,16 +52,16 @@ class Client implements \Psr\Http\Client\ClientInterface{
 			}
 		}
 
-		$options[CURLOPT_CUSTOMREQUEST] = $request->getMethod();
+		$curlOptions[CURLOPT_CUSTOMREQUEST] = $request->getMethod();
 
 		// url
 		if($this->baseUri !== null){
 			$request = $request->withUri($this->baseUri->combine($request->getUri()));
 		}
-		$options[CURLOPT_URL] = $request->getUri();
+		$curlOptions[CURLOPT_URL] = $request->getUri();
 
 		// protocol
-		$options[CURLOPT_HTTP_VERSION] = match($request->getProtocolVersion()){
+		$curlOptions[CURLOPT_HTTP_VERSION] = match($request->getProtocolVersion()){
 			'1.0' => CURL_HTTP_VERSION_1_0,
 			'2', '2.0' => CURL_HTTP_VERSION_2_0,
 			'3', '3.0' => CURL_HTTP_VERSION_3,
@@ -76,11 +76,11 @@ class Client implements \Psr\Http\Client\ClientInterface{
 			}
 		}
 
-		$options[CURLOPT_HTTPHEADER] = $headers;
+		$curlOptions[CURLOPT_HTTPHEADER] = $headers;
 
 		// body
-		if($request->getBody()->getSize() > 0 && !array_key_exists(CURLOPT_POSTFIELDS, $options)){
-			$options[CURLOPT_POSTFIELDS] = (string) $request->getBody();
+		if($request->getBody()->getSize() > 0 && !array_key_exists(CURLOPT_POSTFIELDS, $curlOptions)){
+			$curlOptions[CURLOPT_POSTFIELDS] = (string) $request->getBody();
 		}
 
 		// response headers
@@ -89,7 +89,7 @@ class Client implements \Psr\Http\Client\ClientInterface{
 		$responseStatus = 200;
 		$responseReason = '';
 
-		$options[CURLOPT_HEADERFUNCTION] = function (\CurlHandle $ch, string $header) use (&$responseHeaders, &$responseVersion, &$responseStatus, &$responseReason): int{
+		$curlOptions[CURLOPT_HEADERFUNCTION] = function (\CurlHandle $ch, string $header) use (&$responseHeaders, &$responseVersion, &$responseStatus, &$responseReason): int{
 			$h = trim($header);
 			if($h === ''){ // redirect
 				return strlen($header);
@@ -113,7 +113,7 @@ class Client implements \Psr\Http\Client\ClientInterface{
 		};
 
 		// response body
-		$options[CURLOPT_RETURNTRANSFER] = false;
+		$curlOptions[CURLOPT_RETURNTRANSFER] = false;
 
 		try{
 			$responseBodyStream = new Message\Stream(Internal\ResourceUtil::tryFopen('php://temp', 'w+'));
@@ -121,10 +121,10 @@ class Client implements \Psr\Http\Client\ClientInterface{
 			throw new Exception\ClientException('Failed to initialize response body stream (Internal resource error).', previous: $e);
 		}
 
-		$options[CURLOPT_WRITEFUNCTION] = fn(\CurlHandle $ch, string $data): int => $responseBodyStream->write($data);
+		$curlOptions[CURLOPT_WRITEFUNCTION] = fn(\CurlHandle $ch, string $data): int => $responseBodyStream->write($data);
 
 		// set options
-		curl_setopt_array($ch, array_replace($this->defaultOptions, $options));
+		curl_setopt_array($ch, array_replace($this->defaultCurlOptions, $curlOptions));
 
 		$chResult = curl_exec($ch);
 		if($chResult === false){
