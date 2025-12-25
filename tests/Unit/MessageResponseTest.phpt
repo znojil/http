@@ -36,7 +36,7 @@ final class MessageResponseTest extends \Tester\TestCase{
 		Assert::true($response->isSuccessful());
 
 		Assert::exception(
-			fn(): never => new Response(666),
+			fn() => new Response(666),
 			\InvalidArgumentException::class,
 			'Invalid HTTP status code: 666'
 		);

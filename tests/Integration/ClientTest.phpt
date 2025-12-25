@@ -65,13 +65,13 @@ final class ClientTest extends \Tester\TestCase{
 
 	public function testNetworkErrors(): void{
 		Assert::exception(
-			fn(): never => (new Client)->sendRequest(new Request('GET', 'http://invalid.domain')),
+			fn() => (new Client)->sendRequest(new Request('GET', 'http://invalid.domain')),
 			NetworkException::class,
 			'Could not resolve host: invalid.domain'
 		);
 
 		Assert::exception(
-			fn(): never => (new Client($this->server->getUrl()))->sendRequest(new Request('GET', '/sleep?s=2'), [CURLOPT_TIMEOUT => 1]),
+			fn() => (new Client($this->server->getUrl()))->sendRequest(new Request('GET', '/sleep?s=2'), [CURLOPT_TIMEOUT => 1]),
 			NetworkException::class,
 			'~timed out~i'
 		);

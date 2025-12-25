@@ -58,7 +58,7 @@ final class MessageUriTest extends \Tester\TestCase{
 			'http://example.com:invalid/'
 		] as $v){
 			Assert::exception(
-				fn(): never => new Uri($v),
+				fn() => new Uri($v),
 				\InvalidArgumentException::class,
 				'Unable to parse URI: ' . $v
 			);

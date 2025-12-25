@@ -80,7 +80,7 @@ final class MessageUploadedFileTest extends \Tester\TestCase{
 		Assert::true($file['uploadFile1']->isOk());
 
 		Assert::exception(
-			fn(): never => $file['uploadFile2'][0]->getStream(),
+			fn() => $file['uploadFile2'][0]->getStream(),
 			\RuntimeException::class,
 			'Uploaded file is not valid due to upload error.'
 		);
