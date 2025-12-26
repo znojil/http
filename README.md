@@ -1,7 +1,10 @@
 # Znojil HTTP
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![PHP](https://img.shields.io/badge/php-%5E8.1-777bb4.svg)](https://www.php.net/)
+<!--[![Total Downloads](https://poser.pugx.org/znojil/http/downloads)](https://packagist.org/packages/znojil/http)-->
+[![Latest Stable Version](https://poser.pugx.org/znojil/http/v/stable)](https://github.com/znojil/http/releases)
+[![PHP Version](https://img.shields.io/packagist/php-v/znojil/http)](https://packagist.org/packages/znojil/http)
+[![Tests](https://github.com/znojil/http/actions/workflows/tests.yml/badge.svg)](https://github.com/znojil/http/actions)
+[![License](https://poser.pugx.org/znojil/http/license)](LICENSE)
 
 **Lightweight, strict, and robust implementation of PSR-7, PSR-17, and PSR-18 standards.**
 
