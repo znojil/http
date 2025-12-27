@@ -69,7 +69,7 @@ final class MessageUriTest extends \Tester\TestCase{
 		$uri = new Uri('https://user:pass@example.com:8080/path/to/123?q=1#frag');
 		$newUri = $uri
 			->withScheme('http')
-			->withUserInfo('root')
+			->withUserInfo('root', 'pass')
 			->withHost('example.cz')
 			->withPort(80)
 			->withPath('123/to/path')
@@ -89,16 +89,16 @@ final class MessageUriTest extends \Tester\TestCase{
 		Assert::same('https://user:pass@example.com:8080/path/to/123?q=1#frag', $uri->getAbsoluteUri());
 
 		Assert::same('http', $newUri->getScheme());
-		Assert::same('root@example.cz', $newUri->getAuthority());
-		Assert::same('root', $newUri->getUserInfo());
+		Assert::same('root:pass@example.cz', $newUri->getAuthority());
+		Assert::same('root:pass', $newUri->getUserInfo());
 		Assert::same('example.cz', $newUri->getHost());
 		Assert::same(null, $newUri->getPort());
 		Assert::same('123/to/path', $newUri->getPath());
 		Assert::same('1=q', $newUri->getQuery());
 		Assert::same('graf', $newUri->getFragment());
-		Assert::same('http://root@example.cz', $newUri->getHostUri());
+		Assert::same('http://root:pass@example.cz', $newUri->getHostUri());
 		Assert::same('/123/to/path', $newUri->getComposedPath());
-		Assert::same('http://root@example.cz/123/to/path?1=q#graf', $newUri->getAbsoluteUri());
+		Assert::same('http://root:pass@example.cz/123/to/path?1=q#graf', $newUri->getAbsoluteUri());
 	}
 
 	public function testCombine(): void{
@@ -122,6 +122,7 @@ final class MessageUriTest extends \Tester\TestCase{
 		Assert::same('https://example.com/path', (string) (new Uri('https://example.com'))->withPath('/path'));
 		Assert::same('https://example.com/path', (string) (new Uri('https://example.com/'))->withPath('/path'));
 		Assert::same('https://example.com//path', (string) (new Uri('https://example.com/'))->withPath('//path'));
+		Assert::same('https://example.com', (string) (new Uri('https://example.com/'))->withPath(''));
 
 		Assert::same('mailto:mail@example.com', (string) (new Uri('mailto:'))->withPath('mail@example.com'));
 		Assert::same('mailto:/mail@example.com', (string) (new Uri('mailto:'))->withPath('/mail@example.com'));
@@ -159,10 +160,50 @@ final class MessageUriTest extends \Tester\TestCase{
 	}
 
 	public function testEncoding(): void{
-		Assert::same('/path%20with%20spaces', (new Uri())->withPath('/path with spaces')->getPath());
-		Assert::same('q=hello%20world', (new Uri())->withQuery('q=hello world')->getQuery());
-		Assert::same('/path%20ok', (new Uri())->withPath('/path%20ok')->getPath());
-		Assert::same('%C5%A1koda', (new Uri())->withFragment('škoda')->getFragment());
+		Assert::same('/path%20with%20spaces', (new Uri)->withPath('/path with spaces')->getPath());
+		Assert::same('q=hello%20world', (new Uri)->withQuery('q=hello world')->getQuery());
+		Assert::same('/path%20ok', (new Uri)->withPath('/path%20ok')->getPath());
+		Assert::same('%C5%A1koda', (new Uri)->withFragment('škoda')->getFragment());
+	}
+
+	public function testSchemes(): void{
+		foreach([
+			['https', 'https', 'https:'],
+			['HTTP', 'http', 'http:'],
+			['ftp://', 'ftp', 'ftp:'],
+			['http:', 'http', 'http:'],
+			['http/', 'http', 'http:'],
+			['', '', '']
+		] as $v){
+			$uri = (new Uri)->withScheme($v[0]);
+			Assert::same($v[1], $uri->getScheme());
+			Assert::contains($v[2], (string) $uri);
+		}
+
+		$uri = (new Uri('http://example.com'))->withScheme('');
+		Assert::same('', $uri->getScheme());
+		Assert::notContains('http', (string) $uri);
+
+		Assert::exception(
+			fn() => (new Uri)->withScheme('1http'),
+			\InvalidArgumentException::class,
+			"Invalid scheme '1http'."
+		);
+	}
+
+	public function getUserInfoArgs(): array{
+		return [
+			['root', 'pass', 'root:pass'],
+			['root', '', 'root'],
+			['', 'pass', '']
+		];
+	}
+
+	/**
+	 * @dataProvider getUserInfoArgs
+	 */
+	public function testUserInfo(string $user, string $password, string $expected): void{
+		Assert::same($expected, (new Uri)->withUserInfo($user, $password)->getUserInfo());
 	}
 
 	public function getPortsArgs(): array{
@@ -175,7 +216,7 @@ final class MessageUriTest extends \Tester\TestCase{
 			['ftp', 21, null],
 			['ftp', 22, 22],
 			['custom', null, null],
-			['custom', 1234, 1234],
+			['custom', 1234, 1234]
 		];
 	}
 
@@ -183,7 +224,77 @@ final class MessageUriTest extends \Tester\TestCase{
 	 * @dataProvider getPortsArgs
 	 */
 	public function testPorts(string $scheme, ?int $port, ?int $expected): void{
-		Assert::same($expected, (new Uri())->withScheme($scheme)->withPort($port)->getPort());
+		Assert::same($expected, (new Uri)->withScheme($scheme)->withPort($port)->getPort());
+	}
+
+	public function getQueryArgs(): array{
+		return [
+			['a=1', 'a=1', '?a=1'],
+			['?a=1', 'a=1', '?a=1'],
+			['#a=1', '%23a=1', '?%23a=1']
+		];
+	}
+
+	/**
+	 * @dataProvider getQueryArgs
+	 */
+	public function testQueries(string $query, string $expectedQuery, string $expectedQueryInUri): void{
+		$uri = (new Uri)->withQuery($query);
+		Assert::same($expectedQuery, $uri->getQuery());
+		Assert::contains($expectedQueryInUri, (string) $uri);
+	}
+
+	public function getFragmentArgs(): array{
+		return [
+			['a=1', 'a=1', '#a=1'],
+			['#a=1', 'a=1', '#a=1'],
+			['?a=1', '?a=1', '#?a=1']
+		];
+	}
+
+	/**
+	 * @dataProvider getFragmentArgs
+	 */
+	public function testFragments(string $fragment, string $expectedFragment, string $expectedFragmentInUri): void{
+		$uri = (new Uri)->withFragment($fragment);
+		Assert::same($expectedFragment, $uri->getFragment());
+		Assert::contains($expectedFragmentInUri, (string) $uri);
+	}
+
+	public function testRemoveComponents(): void{
+		$uri = new Uri('https://user:pass@example.com:8080/path/to/123?q=1#frag');
+
+		$uriWithoutScheme = $uri->withScheme('');
+		Assert::same('', $uriWithoutScheme->getScheme());
+		Assert::same('//user:pass@example.com:8080/path/to/123?q=1#frag', (string) $uriWithoutScheme);
+
+		$uriWithoutUser = $uri->withUserInfo('');
+		Assert::same('', $uriWithoutUser->getUserInfo());
+		Assert::same('https://example.com:8080/path/to/123?q=1#frag', (string) $uriWithoutUser);
+
+		$uriWithoutUser2 = $uri->withUserInfo('', 'pass');
+		Assert::same('', $uriWithoutUser2->getUserInfo());
+		Assert::same('https://example.com:8080/path/to/123?q=1#frag', (string) $uriWithoutUser2);
+
+		$uriWithoutHost = $uri->withHost('');
+		Assert::same('', $uriWithoutHost->getHost());
+		Assert::same('https://user:pass@:8080/path/to/123?q=1#frag', (string) $uriWithoutHost);
+
+		$uriWithoutPort = $uri->withPort(null);
+		Assert::same(null, $uriWithoutPort->getPort());
+		Assert::same('https://user:pass@example.com/path/to/123?q=1#frag', (string) $uriWithoutPort);
+
+		$uriWithoutPath = $uri->withPath('');
+		Assert::same('', $uriWithoutPath->getPath());
+		Assert::same('https://user:pass@example.com:8080?q=1#frag', (string) $uriWithoutPath);
+
+		$uriWithoutQuery = $uri->withQuery('');
+		Assert::same('', $uriWithoutQuery->getQuery());
+		Assert::same('https://user:pass@example.com:8080/path/to/123#frag', (string) $uriWithoutQuery);
+
+		$uriWithoutFragment = $uri->withFragment('');
+		Assert::same('', $uriWithoutFragment->getFragment());
+		Assert::same('https://user:pass@example.com:8080/path/to/123?q=1', (string) $uriWithoutFragment);
 	}
 
 }

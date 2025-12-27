@@ -59,13 +59,12 @@ class Uri implements UriInterface{
 			}
 
 			$this->scheme = isset($parts['scheme']) ? $this->filterScheme($parts['scheme']) : '';
-			$this->userInfo = (isset($parts['user']) ? $this->filterUserInfoComponent($parts['user']) : '') .
-				(isset($parts['pass']) ? ':' . $this->filterUserInfoComponent($parts['pass']) : '');
+			$this->userInfo = isset($parts['user']) ? $this->filterUserInfo($parts['user'], $parts['pass'] ?? null) : '';
 			$this->host = isset($parts['host']) ? $this->filterHost($parts['host']) : '';
 			$this->port = isset($parts['port']) ? $this->filterPort($this->scheme, $parts['port']) : null;
 			$this->path = isset($parts['path']) ? $this->filterPath($parts['path']) : '';
-			$this->query = isset($parts['query']) ? $this->filterQueryAndFragment($parts['query']) : '';
-			$this->fragment = isset($parts['fragment']) ? $this->filterQueryAndFragment($parts['fragment']) : '';
+			$this->query = isset($parts['query']) ? $this->filterQuery($parts['query']) : '';
+			$this->fragment = isset($parts['fragment']) ? $this->filterFragment($parts['fragment']) : '';
 		}elseif($uri instanceof self){
 			[$this->scheme, $this->userInfo, $this->host, $this->port, $this->path, $this->query, $this->fragment] = $uri->export();
 		}
@@ -126,11 +125,7 @@ class Uri implements UriInterface{
 	}
 
 	public function withUserInfo(string $user, ?string $password = null): static{
-		$userInfo = $this->filterUserInfoComponent($user);
-		if($password !== null){
-			$userInfo .= ':' . $this->filterUserInfoComponent($password);
-		}
-
+		$userInfo = $this->filterUserInfo($user, $password);
 		if($userInfo === $this->userInfo){
 			return $this;
 		}
@@ -178,7 +173,7 @@ class Uri implements UriInterface{
 	}
 
 	public function withQuery(string $query): static{
-		$query = $this->filterQueryAndFragment($query);
+		$query = $this->filterQuery($query);
 		if($query === $this->query){
 			return $this;
 		}
@@ -190,7 +185,7 @@ class Uri implements UriInterface{
 	}
 
 	public function withFragment(string $fragment): static{
-		$fragment = $this->filterQueryAndFragment($fragment);
+		$fragment = $this->filterFragment($fragment);
 		if($fragment === $this->fragment){
 			return $this;
 		}
@@ -294,12 +289,29 @@ class Uri implements UriInterface{
 		return [$this->scheme, $this->userInfo, $this->host, $this->port, $this->path, $this->query, $this->fragment];
 	}
 
+	/**
+	 * @throws \InvalidArgumentException if scheme is invalid
+	 */
 	private function filterScheme(string $scheme): string{
-		return strtolower($scheme);
+		$scheme = rtrim(strtolower($scheme), ':/');
+		if($scheme !== '' && !preg_match('~^[a-z][a-z0-9+\.-]*$~', $scheme)){
+			throw new \InvalidArgumentException("Invalid scheme '$scheme'.");
+		}
+
+		return $scheme;
 	}
 
-	private function filterUserInfoComponent(string $component): string{
-		return $this->encode($component, self::CharUserInfo);
+	private function filterUserInfo(string $user, ?string $password = null): string{
+		if($user === ''){
+			return '';
+		}
+
+		$userInfo = $this->encode($user, self::CharUserInfo);
+		if($password !== null && $password !== ''){
+			$userInfo .= ':' . $this->encode($password, self::CharUserInfo);
+		}
+
+		return $userInfo;
 	}
 
 	private function filterHost(string $host): string{
@@ -326,8 +338,12 @@ class Uri implements UriInterface{
 		return $this->encode($path, self::CharPath);
 	}
 
-	private function filterQueryAndFragment(string $str): string{
-		return $this->encode($str, self::CharQuery);
+	private function filterQuery(string $str): string{
+		return $this->encode(ltrim($str, '?'), self::CharQuery);
+	}
+
+	private function filterFragment(string $str): string{
+		return $this->encode(ltrim($str, '#'), self::CharQuery);
 	}
 
 	private function encode(string $str, string $allowedChars): string{
