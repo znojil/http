@@ -126,7 +126,7 @@ class RequestFactory{
 	private function prepareBody(mixed $body, array &$headers): mixed{
 		$contentType = array_change_key_case($headers, CASE_LOWER)['content-type'] ?? '';
 		if(is_array($contentType)){
-			$contentType = implode(', ', $contentType); // line
+			$contentType = implode(', ', $contentType);
 		}
 
 		switch(true){

@@ -10,7 +10,7 @@ final class ResourceUtil{
 	 * @throws \RuntimeException
 	 */
 	public static function tryFopen(string $filename, string $mode){
-		if (!($resource = @fopen($filename, $mode))){
+		if(!($resource = @fopen($filename, $mode))){
 			throw new \RuntimeException("Failed to open resource '$filename' with mode '$mode'. Check permissions or available memory.");
 		}
 
