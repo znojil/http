@@ -31,5 +31,9 @@
 		"psr-4": {
 			"Znojil\\Http\\Tests\\": "tests/"
 		}
+	},
+	"scripts": {
+		"phpstan": "vendor/bin/phpstan",
+		"tester": "vendor/bin/tester tests -s -C"
 	}
 }
