@@ -71,7 +71,7 @@ final class Psr17FactoryTest extends \Tester\TestCase{
 	}
 
 	public function testStreamFromResource(): void{
-		$resource = fopen('php://memory', 'r+');
+		$resource = \Znojil\Http\Internal\ResourceUtil::tryFopen('php://memory', 'r+');
 		fwrite($resource, 'memory content');
 
 		$stream = $this->factory->createStreamFromResource($resource);

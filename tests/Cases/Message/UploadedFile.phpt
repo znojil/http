@@ -70,6 +70,8 @@ final class UploadedFileTest extends \Tester\TestCase{
 				],
 			]
 		];
+
+		/** @var array{uploadFile1: UploadedFile, uploadFile2: UploadedFile[], uploadFile3: UploadedFile[]} */
 		$file = UploadedFile::fromGlobals();
 
 		Assert::same('tmp file content 1', (string) $file['uploadFile1']->getStream());
@@ -122,7 +124,7 @@ final class UploadedFileTest extends \Tester\TestCase{
 		$target = TempDir . '/temp_target.txt';
 		file_put_contents($source, 'file content');
 
-		$upload = new UploadedFile($source, filesize($source), \UPLOAD_ERR_OK);
+		$upload = new UploadedFile($source, filesize($source) ?: null, \UPLOAD_ERR_OK);
 
 		try{
 			$upload->moveTo($target);
@@ -172,7 +174,7 @@ final class UploadedFileTest extends \Tester\TestCase{
 		$source = TempDir . '/temp_lazy.txt';
 		file_put_contents($source, 'lazy content');
 
-		$upload = new UploadedFile($source, filesize($source));
+		$upload = new UploadedFile($source, filesize($source) ?: null);
 
 		try{
 			$stream1 = $upload->getStream();

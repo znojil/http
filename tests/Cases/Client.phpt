@@ -54,6 +54,7 @@ final class ClientTest extends \Tester\TestCase{
 		Assert::same('OK!', $response->getReasonPhrase());
 		Assert::same('Bar, baZ', $response->getHeaderLine('foo'));
 
+		/** @var array{method: string, uri: string, query: array<string, string>, headers: array<string, string>, body: string} $serverReceived */
 		$serverReceived = json_decode((string) $response->getBody(), true);
 		Assert::same('application/json', $serverReceived['headers']['Content-Type']);
 		Assert::same('POST', $serverReceived['method']);

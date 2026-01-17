@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Znojil\Http\Tests\Cases\Message;
 
 use Tester\Assert;
+use Znojil\Http\Internal\ResourceUtil;
 use Znojil\Http\Message\Stream;
 
 require __DIR__ . '/../../bootstrap.php';
@@ -14,7 +15,7 @@ require __DIR__ . '/../../bootstrap.php';
 final class StreamTest extends \Tester\TestCase{
 
 	public function testCreateFromResource(): void{
-		$resource = \Znojil\Http\Internal\ResourceUtil::tryFopen('php://memory', 'r+');
+		$resource = ResourceUtil::tryFopen('php://memory', 'r+');
 		fwrite($resource, 'test data');
 		rewind($resource);
 
@@ -55,7 +56,7 @@ final class StreamTest extends \Tester\TestCase{
 		$file = TempDir . '/temp_read.txt';
 		file_put_contents($file, 'readonly content');
 
-		$resource = fopen($file, 'r');
+		$resource = ResourceUtil::tryFopen($file, 'r');
 		$stream = new Stream($resource);
 
 		Assert::true($stream->isReadable());
@@ -73,7 +74,7 @@ final class StreamTest extends \Tester\TestCase{
 	public function testWriteonly(): void{
 		$file = TempDir . '/temp_write.txt';
 
-		$resource = fopen($file, 'w');
+		$resource = ResourceUtil::tryFopen($file, 'w');
 		$stream = new Stream($resource);
 
 		Assert::false($stream->isReadable());
@@ -105,7 +106,7 @@ final class StreamTest extends \Tester\TestCase{
 			$stream->getContents();
 		}, \RuntimeException::class, 'Stream is detached.');
 
-		fclose($resource);
+		$stream->close();
 	}
 
 	public function testSeekAndRewind(): void{

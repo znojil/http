@@ -71,7 +71,7 @@ final class ResponseTest extends \Tester\TestCase{
 		Assert::same('', (string) $response->getBody());
 		// response
 		Assert::same(201, $response->getStatusCode());
-		Assert::same($response::ReasonPhrases[201], $response->getReasonPhrase());
+		Assert::same(Response::ReasonPhrases[201], $response->getReasonPhrase());
 		Assert::true($response->isSuccessful());
 
 		// message
@@ -85,7 +85,7 @@ final class ResponseTest extends \Tester\TestCase{
 		// response
 		Assert::same(404, $newResponse->getStatusCode());
 		Assert::same('not found', $newResponse->getReasonPhrase());
-		Assert::notSame($newResponse::ReasonPhrases[404], $newResponse->getReasonPhrase());
+		Assert::notSame(Response::ReasonPhrases[404], $newResponse->getReasonPhrase());
 		Assert::false($newResponse->isSuccessful());
 	}
 

@@ -191,6 +191,7 @@ final class UriTest extends \Tester\TestCase{
 		);
 	}
 
+	/** @return array<array{string, string, string}> */
 	public function getUserInfoArgs(): array{
 		return [
 			['root', 'pass', 'root:pass'],
@@ -206,6 +207,7 @@ final class UriTest extends \Tester\TestCase{
 		Assert::same($expected, (new Uri)->withUserInfo($user, $password)->getUserInfo());
 	}
 
+	/** @return array<array{string, int|null, int|null}> */
 	public function getPortsArgs(): array{
 		return [
 			['http', null, null],
@@ -227,6 +229,7 @@ final class UriTest extends \Tester\TestCase{
 		Assert::same($expected, (new Uri)->withScheme($scheme)->withPort($port)->getPort());
 	}
 
+	/** @return array<array{string, string, string}> */
 	public function getQueryArgs(): array{
 		return [
 			['a=1', 'a=1', '?a=1'],
@@ -244,6 +247,7 @@ final class UriTest extends \Tester\TestCase{
 		Assert::contains($expectedQueryInUri, (string) $uri);
 	}
 
+	/** @return array<array{string, string, string}> */
 	public function getFragmentArgs(): array{
 		return [
 			['a=1', 'a=1', '#a=1'],

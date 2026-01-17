@@ -41,6 +41,7 @@ final class ServerRequestTest extends \Tester\TestCase{
 		Assert::same(['debug' => 'true'], $serverRequest->getQueryParams());
 		Assert::same(['action' => 'update'], $serverRequest->getParsedBody());
 
+		/** @var array<string, UploadedFile> */
 		$files = $serverRequest->getUploadedFiles();
 		Assert::count(1, $files);
 		Assert::type(UploadedFile::class, $files['doc']);
