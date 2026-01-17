@@ -64,7 +64,7 @@ $body = $request->getParsedBody();
 
 // Working with Uploaded Files
 $files = $request->getUploadedFiles();
-if (isset($files['document']) && $files['document']->isOk()) {
+if (isset($files['document']) && $files['document']->isOk()){
 	$files['document']->moveTo('/storage/uploads/doc.pdf');
 }
 ```
