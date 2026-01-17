@@ -8,8 +8,8 @@ $requestUri = (isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI
 $uriParts = @parse_url($requestUri);
 $path = ltrim($uriParts['path'] ?? '', '/');
 
-match($path){
-	'json' => (function (): void{
+match(true){
+	$path === 'json' => (function (): void{
 		header('HTTP/3.0 200 OK!');
 		header('Foo: Bar');
 		header('Foo: baZ', false);
@@ -22,16 +22,24 @@ match($path){
 			'query' => $_GET
 		]);
 	})(),
-	'sleep' => (function (): void{
+	$path === 'sleep' => (function (): void{
 		$seconds = (isset($_GET['s']) && is_int($_GET['s'])) ? (int) $_GET['s'] : 1;
 		sleep($seconds);
 
 		echo "Slept for $seconds seconds";
 	})(),
-	'ping' => (function (): void{
+	$path === 'ping' => (function (): void{
 		header('HTTP/2.0 200 ok');
 
 		echo 'pong';
+	})(),
+	str_starts_with($path, 'api') => (function (): void{
+		header('HTTP/2.0 200');
+
+		echo json_encode([
+			'uri' => $_SERVER['REQUEST_URI'],
+			'query' => $_GET
+		]);
 	})(),
 	default => (function (): void{
 		http_response_code(404);

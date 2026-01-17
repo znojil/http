@@ -177,6 +177,26 @@ final class RequestFactoryTest extends \Tester\TestCase{
 		fclose($resource);
 	}
 
+	public function testCurlFileException(): void{
+		Assert::exception(
+			fn() => $this->factory->post('http://api.com', ['file' => new \CURLFile(__FILE__)]),
+			\InvalidArgumentException::class,
+			"Cannot prepare body with CURLFile, use raw 'CURLOPT_POSTFIELDS'."
+		);
+	}
+
+	public function testJsonEncodeFailure(): void{
+		$resource = \Znojil\Http\Internal\ResourceUtil::tryFopen('php://memory', 'r+');
+
+		Assert::exception(
+			fn() => $this->factory->postJson('http://api.com', ['data' => $resource]),
+			\LogicException::class,
+			'Failed to prepare the query body.'
+		);
+
+		fclose($resource);
+	}
+
 }
 
 (new RequestFactoryTest)->run();
