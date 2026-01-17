@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Znojil\Http\Tests\Unit;
+namespace Znojil\Http\Tests\Cases\Message;
 
 use Tester\Assert;
 use Znojil\Http\Message\Uri;
 
-require __DIR__ . '/../bootstrap.php';
+require __DIR__ . '/../../bootstrap.php';
 
 /**
  * @testCase
  */
-final class MessageUriTest extends \Tester\TestCase{
+final class UriTest extends \Tester\TestCase{
 
 	public function testFromGlobals(): void{
 		$uri = Uri::fromGlobals();
@@ -299,4 +299,4 @@ final class MessageUriTest extends \Tester\TestCase{
 
 }
 
-(new MessageUriTest)->run();
+(new UriTest)->run();

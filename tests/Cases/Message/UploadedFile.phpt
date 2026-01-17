@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Znojil\Http\Tests\Unit;
+namespace Znojil\Http\Tests\Cases\Message;
 
 use Tester\Assert;
 use Znojil\Http\Message\Stream;
 use Znojil\Http\Message\UploadedFile;
 
-require __DIR__ . '/../bootstrap.php';
+require __DIR__ . '/../../bootstrap.php';
 
 /**
  * @testCase
  */
-final class MessageUploadedFileTest extends \Tester\TestCase{
+final class UploadedFileTest extends \Tester\TestCase{
 
 	public function testFromGlobals(): void{
 		$tmpName1 = TempDir . '/temp_source1.txt';
@@ -204,4 +204,4 @@ final class MessageUploadedFileTest extends \Tester\TestCase{
 
 }
 
-(new MessageUploadedFileTest)->run();
+(new UploadedFileTest)->run();

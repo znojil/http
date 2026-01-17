@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Znojil\Http\Tests\Unit;
+namespace Znojil\Http\Tests\Cases;
 
 use Tester\Assert;
 use Znojil\Http\RequestFactory;

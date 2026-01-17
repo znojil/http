@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Znojil\Http\Tests\Unit;
+namespace Znojil\Http\Tests\Cases\Message;
 
 use Tester\Assert;
 use Znojil\Http\Message\Stream;
 
-require __DIR__ . '/../bootstrap.php';
+require __DIR__ . '/../../bootstrap.php';
 
 /**
  * @testCase
  */
-final class MessageStreamTest extends \Tester\TestCase{
+final class StreamTest extends \Tester\TestCase{
 
 	public function testCreateFromResource(): void{
 		$resource = \Znojil\Http\Internal\ResourceUtil::tryFopen('php://memory', 'r+');
@@ -52,7 +52,7 @@ final class MessageStreamTest extends \Tester\TestCase{
 	}
 
 	public function testReadonly(): void{
-		$file = __DIR__ . '/temp_read.txt';
+		$file = TempDir . '/temp_read.txt';
 		file_put_contents($file, 'readonly content');
 
 		$resource = fopen($file, 'r');
@@ -71,7 +71,7 @@ final class MessageStreamTest extends \Tester\TestCase{
 	}
 
 	public function testWriteonly(): void{
-		$file = __DIR__ . '/temp_write.txt';
+		$file = TempDir . '/temp_write.txt';
 
 		$resource = fopen($file, 'w');
 		$stream = new Stream($resource);
@@ -134,4 +134,4 @@ final class MessageStreamTest extends \Tester\TestCase{
 
 }
 
-(new MessageStreamTest)->run();
+(new StreamTest)->run();

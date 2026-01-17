@@ -1,19 +1,19 @@
 <?php
 declare(strict_types=1);
 
-namespace Znojil\Http\Tests\Unit;
+namespace Znojil\Http\Tests\Cases\Message;
 
 use Tester\Assert;
 use Znojil\Http\Enum\Method;
 use Znojil\Http\Message\Request;
 use Znojil\Http\Message\Uri;
 
-require __DIR__ . '/../bootstrap.php';
+require __DIR__ . '/../../bootstrap.php';
 
 /**
  * @testCase
  */
-final class MessageRequestTest extends \Tester\TestCase{
+final class RequestTest extends \Tester\TestCase{
 
 	public function testConstructor(): void{
 		$request = new Request('GET', 'https://example.com/path?q=1', [
@@ -118,4 +118,4 @@ final class MessageRequestTest extends \Tester\TestCase{
 
 }
 
-(new MessageRequestTest)->run();
+(new RequestTest)->run();

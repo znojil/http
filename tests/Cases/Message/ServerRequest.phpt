@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace Znojil\Http\Tests\Unit;
+namespace Znojil\Http\Tests\Cases\Message;
 
 use Tester\Assert;
 use Znojil\Http\Message\ServerRequest;
 use Znojil\Http\Message\UploadedFile;
 
-require __DIR__ . '/../bootstrap.php';
+require __DIR__ . '/../../bootstrap.php';
 
 /**
  * @testCase
  */
-final class MessageServerRequestTest extends \Tester\TestCase{
+final class ServerRequestTest extends \Tester\TestCase{
 
 	public function testFromGlobals(): void{
 		$_SERVER['REQUEST_METHOD'] = 'PUT';
@@ -95,4 +95,4 @@ final class MessageServerRequestTest extends \Tester\TestCase{
 
 }
 
-(new MessageServerRequestTest)->run();
+(new ServerRequestTest)->run();

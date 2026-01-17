@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace Znojil\Http\Tests\Unit;
+namespace Znojil\Http\Tests\Cases\Enum;
 
 use Tester\Assert;
 
-require __DIR__ . '/../bootstrap.php';
+require __DIR__ . '/../../bootstrap.php';
 
 /**
  * @testCase
  */
-final class EnumContentTypeTest extends \Tester\TestCase{
+final class ContentTypeTest extends \Tester\TestCase{
 
 	public function testConstructor(): void{
 		$ct = \Znojil\Http\Enum\ContentType::Json;
@@ -22,4 +22,4 @@ final class EnumContentTypeTest extends \Tester\TestCase{
 
 }
 
-(new EnumContentTypeTest)->run();
+(new ContentTypeTest)->run();

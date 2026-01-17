@@ -1,17 +1,17 @@
 <?php
 declare(strict_types=1);
 
-namespace Znojil\Http\Tests\Unit;
+namespace Znojil\Http\Tests\Cases\Message;
 
 use Tester\Assert;
 use Znojil\Http\Message\Response;
 
-require __DIR__ . '/../bootstrap.php';
+require __DIR__ . '/../../bootstrap.php';
 
 /**
  * @testCase
  */
-final class MessageResponseTest extends \Tester\TestCase{
+final class ResponseTest extends \Tester\TestCase{
 
 	public function testConstructor(): void{
 		$response = new Response(200, [
@@ -91,4 +91,4 @@ final class MessageResponseTest extends \Tester\TestCase{
 
 }
 
-(new MessageResponseTest)->run();
+(new ResponseTest)->run();
