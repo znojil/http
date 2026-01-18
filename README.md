@@ -103,6 +103,28 @@ $request = $factory->patchJson('https://api.example.com/users/1', ['status' => '
 $request = $factory->delete('https://api.example.com/users/1');
 ```
 
+#### File Upload (Multipart)
+
+For file uploads with additional form fields, use cURL's native `CURLFile` via `CURLOPT_POSTFIELDS`:
+
+```php
+use Znojil\Http\Client;
+use Znojil\Http\RequestFactory;
+
+$client = new Client;
+$factory = new RequestFactory;
+
+$request = $factory->post('https://api.example.com/upload');
+
+$response = $client->sendRequest($request, [
+	CURLOPT_POSTFIELDS => [
+		'title' => 'My Document',
+		'category' => 'reports',
+		'file' => new \CURLFile('/path/to/document.pdf', 'application/pdf', 'document.pdf')
+	]
+]);
+```
+
 ### 2. Handling Incoming Request (Server)
 
 Ideal for API endpoints or webhook processing.
@@ -119,7 +141,7 @@ $body = $request->getParsedBody();
 
 // Working with Uploaded Files
 $files = $request->getUploadedFiles();
-if (isset($files['document']) && $files['document']->isOk()){
+if(isset($files['document']) && $files['document']->isOk()){
 	$files['document']->moveTo('/storage/uploads/doc.pdf');
 }
 ```
