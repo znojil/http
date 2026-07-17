@@ -30,6 +30,7 @@ match(true){
 	})(),
 	$path === 'ping' => (function (): void{
 		header('HTTP/2.0 200 ok');
+		header('Content-Length: 4');
 
 		echo 'pong';
 	})(),

@@ -64,6 +64,22 @@ final class ClientTest extends \Tester\TestCase{
 		Assert::same(['q' => '1'], $serverReceived['query']);
 	}
 
+	/**
+	 * HEAD nobody.
+	 */
+	public function testHeadRequest(): void{
+		$client = new Client($this->server->getUrl());
+
+		$response = $client->sendRequest(
+			new Request(\Znojil\Http\Enum\Method::Head, '/ping'),
+			[CURLOPT_TIMEOUT => 3]
+		);
+
+		Assert::same(200, $response->getStatusCode());
+		Assert::same('4', $response->getHeaderLine('Content-Length'));
+		Assert::same('', (string) $response->getBody());
+	}
+
 	public function testNetworkErrors(): void{
 		Assert::exception(
 			fn() => (new Client)->sendRequest(new Request('GET', 'http://invalid.domain')),

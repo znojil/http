@@ -52,7 +52,11 @@ class Client implements \Psr\Http\Client\ClientInterface{
 			}
 		}
 
-		$curlOptions[CURLOPT_CUSTOMREQUEST] = $request->getMethod();
+		$curlOptions[CURLOPT_CUSTOMREQUEST] = $method = $request->getMethod();
+
+		if($method === 'HEAD'){
+			$curlOptions[CURLOPT_NOBODY] = true;
+		}
 
 		// url
 		if($this->baseUri !== null){
