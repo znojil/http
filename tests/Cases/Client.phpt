@@ -144,6 +144,23 @@ final class ClientTest extends \Tester\TestCase{
 		Assert::same('10', $serverReceived['query']['limit']);
 	}
 
+	public function testBodyWithUnknownStreamSize(): void{
+		$resource = \Znojil\Http\Internal\ResourceUtil::tryFopen('php://temp', 'w+');
+		fwrite($resource, 'stream-data');
+		rewind($resource);
+
+		$client = new Client($this->server->getUrl());
+		$response = $client->sendRequest(new Request(
+			'POST',
+			'/json',
+			body: new Fixtures\NullSizeStream($resource)
+		));
+
+		/** @var array{body: string} */
+		$serverReceived = json_decode((string) $response->getBody(), true);
+		Assert::same('stream-data', $serverReceived['body']);
+	}
+
 }
 
 (new ClientTest)->run();

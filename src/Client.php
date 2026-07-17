@@ -83,8 +83,11 @@ class Client implements \Psr\Http\Client\ClientInterface{
 		$curlOptions[CURLOPT_HTTPHEADER] = $headers;
 
 		// body
-		if($request->getBody()->getSize() > 0 && !array_key_exists(CURLOPT_POSTFIELDS, $curlOptions)){
-			$curlOptions[CURLOPT_POSTFIELDS] = (string) $request->getBody();
+		$bodySize = $request->getBody()->getSize();
+		if(($bodySize === null || $bodySize > 0) && !array_key_exists(CURLOPT_POSTFIELDS, $curlOptions)){
+			if(($body = (string) $request->getBody()) !== ''){
+				$curlOptions[CURLOPT_POSTFIELDS] = $body;
+			}
 		}
 
 		// response headers
