@@ -19,6 +19,8 @@ class ServerRequest extends Request implements PsrMessage\ServerRequestInterface
 			foreach($_SERVER as $k => $v){
 				if(str_starts_with($k, 'HTTP_')){
 					$headers[str_replace('_', '-', substr($k, 5))] = $v;
+				}elseif(in_array($k, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true)){
+					$headers[str_replace('_', '-', $k)] = $v;
 				}
 			}
 		}

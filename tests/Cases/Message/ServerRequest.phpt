@@ -19,6 +19,9 @@ final class ServerRequestTest extends \Tester\TestCase{
 		$_SERVER['HTTPS'] = 'on';
 		$_SERVER['HTTP_HOST'] = 'api.test.cz';
 		$_SERVER['REQUEST_URI'] = '/v1/resource?debug=true';
+		$_SERVER['HTTP_X_REQUEST_ID'] = 'abc-123';
+		$_SERVER['CONTENT_TYPE'] = 'application/json';
+		$_SERVER['CONTENT_LENGTH'] = '42';
 		$_GET = ['debug' => 'true'];
 		$_POST = ['action' => 'update'];
 		$_COOKIE = ['token' => 'secret'];
@@ -37,6 +40,9 @@ final class ServerRequestTest extends \Tester\TestCase{
 		Assert::same('PUT', $serverRequest->getMethod());
 		Assert::same('api.test.cz', $serverRequest->getUri()->getHost());
 		Assert::same('https://api.test.cz/v1/resource?debug=true', (string) $serverRequest->getUri());
+		Assert::same('abc-123', $serverRequest->getHeaderLine('X-Request-Id'));
+		Assert::same('application/json', $serverRequest->getHeaderLine('Content-Type'));
+		Assert::same('42', $serverRequest->getHeaderLine('Content-Length'));
 		Assert::same(['token' => 'secret'], $serverRequest->getCookieParams());
 		Assert::same(['debug' => 'true'], $serverRequest->getQueryParams());
 		Assert::same(['action' => 'update'], $serverRequest->getParsedBody());
