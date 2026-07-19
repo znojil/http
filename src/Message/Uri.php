@@ -7,14 +7,6 @@ use Psr\Http\Message\UriInterface;
 
 class Uri implements UriInterface{
 
-	/** @var array<string, int> */
-	public static array $defaultPorts = [
-		'http' => 80,
-		'https' => 443,
-		'ftp' => 21,
-		'ssh' => 22
-	];
-
 	public static function fromGlobals(): self{
 		$scheme = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
 		$httpHost = (isset($_SERVER['HTTP_HOST']) && is_string($_SERVER['HTTP_HOST']))
@@ -26,6 +18,13 @@ class Uri implements UriInterface{
 
 		return new self($scheme . '://' . $httpHost . $requestUri);
 	}
+
+	private const DefaultPorts = [
+		'http' => 80,
+		'https' => 443,
+		'ftp' => 21,
+		'ssh' => 22
+	];
 
 	private const CharUnreserved = 'a-zA-Z0-9_\-\.\~';
 
@@ -323,7 +322,7 @@ class Uri implements UriInterface{
 			throw new \InvalidArgumentException("Invalid port '$port'. Must be between 1 and 65535.");
 		}
 
-		if(isset(self::$defaultPorts[$scheme]) && self::$defaultPorts[$scheme] === $port){
+		if(isset(self::DefaultPorts[$scheme]) && self::DefaultPorts[$scheme] === $port){
 			return null;
 		}
 
