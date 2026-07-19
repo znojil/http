@@ -107,13 +107,20 @@ final class UriTest extends \Tester\TestCase{
 		Assert::same('https://api.site.com/v1/users?key=123&pass=abc', (string) $uri->combine(new Uri('users')));
 		Assert::same('https://api.site.com/v1/users?key=123&pass=abc', (string) $uri->combine(new Uri('/users')));
 		Assert::same('https://api.site.com/v1/users?key=123&pass=abc&limit=5', (string) $uri->combine(new Uri('users?limit=5')));
-		Assert::same('https://api.site.com/v1/users?key=321&pass=abc', (string) $uri->combine(new Uri('users?key=321')));
+		Assert::same('https://api.site.com/v1/users?key=123&pass=abc&key=321', (string) $uri->combine(new Uri('users?key=321')));
 
 		$uri2 = new Uri('https://google.com:443');
 		$uri3 = new Uri('https://google.com:443');
 		Assert::same('https://google.com', (string) $uri->combine($uri2));
 		Assert::same($uri2, $uri->combine($uri2));
 		Assert::notSame($uri3, $uri->combine($uri2));
+
+		$uriDots = new Uri('https://api.site.com/v1?filter.name=foo');
+		Assert::same('https://api.site.com/v1?filter.name=foo&sort.dir=asc', (string) $uriDots->combine(new Uri('?sort.dir=asc')));
+		Assert::same('https://api.site.com/v1?filter.name=foo&filter.name=bar', (string) $uriDots->combine(new Uri('?filter.name=bar')));
+
+		$uriPlus = new Uri('https://api.site.com/v1?q=a+b');
+		Assert::same('https://api.site.com/v1?q=a+b&page=2', (string) $uriPlus->combine(new Uri('?page=2')));
 	}
 
 	public function testPathManipulation(): void{
@@ -234,7 +241,8 @@ final class UriTest extends \Tester\TestCase{
 		return [
 			['a=1', 'a=1', '?a=1'],
 			['?a=1', 'a=1', '?a=1'],
-			['#a=1', '%23a=1', '?%23a=1']
+			['#a=1', '%23a=1', '?%23a=1'],
+			['a=1+2', 'a=1+2', '?a=1+2']
 		];
 	}
 

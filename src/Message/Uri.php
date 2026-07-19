@@ -268,14 +268,10 @@ class Uri implements UriInterface{
 
 		$newQuery = $relative->getQuery();
 		if($newQuery !== ''){
-			if(($baseQuery = $this->getQuery()) !== ''){
-				parse_str($baseQuery, $baseQueryParams);
-				parse_str($newQuery, $newQueryParams);
-
-				$newQuery = http_build_query(array_merge($baseQueryParams, $newQueryParams), '', '&', PHP_QUERY_RFC3986);
-			}
-
-			$newUri = $newUri->withQuery($newQuery);
+			$newUri = $newUri->withQuery(($baseQuery = $this->getQuery()) !== ''
+				? ($baseQuery . '&' . $newQuery)
+				: $newQuery
+			);
 		}
 
 		return $newUri->withFragment($relative->getFragment());
