@@ -49,7 +49,6 @@ class RequestFactory{
 			$newQuery = http_build_query($queryParams, '', '&', PHP_QUERY_RFC3986);
 
 			$uriObj = $uri instanceof UriInterface ? $uri : new Message\Uri($uri);
-			$currentQuery = $uriObj->getQuery();
 
 			$uri = $uriObj->withQuery(($currentQuery = $uriObj->getQuery()) !== ''
 				? $currentQuery . '&' . $newQuery

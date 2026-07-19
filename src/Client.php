@@ -62,7 +62,7 @@ class Client implements \Psr\Http\Client\ClientInterface{
 		if($this->baseUri !== null){
 			$request = $request->withUri($this->baseUri->combine($request->getUri()));
 		}
-		$curlOptions[CURLOPT_URL] = $request->getUri();
+		$curlOptions[CURLOPT_URL] = (string) $request->getUri();
 
 		// protocol
 		$curlOptions[CURLOPT_HTTP_VERSION] = match($request->getProtocolVersion()){
