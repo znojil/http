@@ -322,7 +322,7 @@ class Uri implements UriInterface{
 			throw new \InvalidArgumentException("Invalid port '$port'. Must be between 1 and 65535.");
 		}
 
-		if(isset(self::DefaultPorts[$scheme]) && self::DefaultPorts[$scheme] === $port){
+		if((self::DefaultPorts[$scheme] ?? null) === $port){
 			return null;
 		}
 
