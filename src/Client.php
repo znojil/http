@@ -39,6 +39,9 @@ class Client implements \Psr\Http\Client\ClientInterface{
 
 	/**
 	 * @param array<int, mixed> $curlOptions options for curl_setopt_array() (e.g. CURLOPT_TIMEOUT => 5)
+	 * @throws Exception\ClientException when cURL cannot be initialized
+	 * @throws Exception\RequestException when the request itself is invalid (malformed URL, unsupported protocol)
+	 * @throws Exception\NetworkException on network-level failures (DNS, timeout, SSL, ...)
 	 */
 	public function sendRequest(PsrMessage\RequestInterface $request, array $curlOptions = []): PsrMessage\ResponseInterface{
 		if(!($ch = curl_init())){
@@ -138,7 +141,10 @@ class Client implements \Psr\Http\Client\ClientInterface{
 			$error = curl_error($ch);
 			$errorCode = curl_errno($ch);
 
-			throw new Exception\NetworkException($request, $error, $errorCode);
+			throw match($errorCode){
+				CURLE_UNSUPPORTED_PROTOCOL, CURLE_URL_MALFORMAT => new Exception\RequestException($request, $error, $errorCode),
+				default => new Exception\NetworkException($request, $error, $errorCode)
+			};
 		}
 
 		$responseBodyStream->rewind();

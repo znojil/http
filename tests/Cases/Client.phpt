@@ -6,6 +6,7 @@ namespace Znojil\Http\Tests\Cases;
 use Tester\Assert;
 use Znojil\Http\Client;
 use Znojil\Http\Exception\NetworkException;
+use Znojil\Http\Exception\RequestException;
 use Znojil\Http\Message\Request;
 use Znojil\Http\Tests\Fixtures;
 use Znojil\Http\Tests\Support\Server;
@@ -92,6 +93,19 @@ final class ClientTest extends \Tester\TestCase{
 			NetworkException::class,
 			'~timed out~i'
 		);
+	}
+
+	public function testRequestException(): void{
+		/** @var RequestException */
+		$e = Assert::exception(
+			fn() => (new Client)->sendRequest(new Request('GET', 'ftp://example.com')),
+			RequestException::class
+		);
+
+		Assert::type(\Znojil\Http\Exception\ClientException::class, $e);
+		Assert::type(\Psr\Http\Client\RequestExceptionInterface::class, $e);
+		Assert::same(CURLE_UNSUPPORTED_PROTOCOL, $e->getCode());
+		Assert::same('ftp://example.com', (string) $e->getRequest()->getUri());
 	}
 
 	public function testNotFound(): void{

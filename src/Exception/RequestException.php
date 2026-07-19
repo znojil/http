@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Znojil\Http\Exception;
 
-class NetworkException extends ClientException implements \Psr\Http\Client\NetworkExceptionInterface{
+class RequestException extends ClientException implements \Psr\Http\Client\RequestExceptionInterface{
 
 	public function __construct(
 		private readonly \Psr\Http\Message\RequestInterface $request,

@@ -168,8 +168,9 @@ The library throws PSR-18 compliant exceptions:
 
 ```php
 use Znojil\Http\Client;
-use Znojil\Http\Exception\NetworkException;
 use Znojil\Http\Exception\ClientException;
+use Znojil\Http\Exception\NetworkException;
+use Znojil\Http\Exception\RequestException;
 
 $client = new Client;
 
@@ -179,8 +180,11 @@ try{
 	// Network-level errors (DNS failure, connection timeout, etc.)
 	echo 'Network error: ' . $e->getMessage();
 	$failedRequest = $e->getRequest(); // Access the original request
+}catch(RequestException $e){
+	// The request itself is invalid (malformed URL, unsupported protocol)
+	echo 'Request error: ' . $e->getMessage();
 }catch(ClientException $e){
-	// Client initialization errors
+	// Client initialization errors (also the base class of all client exceptions)
 	echo 'Client error: ' . $e->getMessage();
 }
 ```
