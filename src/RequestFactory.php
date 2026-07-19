@@ -19,15 +19,14 @@ class RequestFactory{
 
 	/**
 	 * @param array<string, string|string[]> $headers
-	 * @throws \LogicException
+	 * @throws \JsonException when JSON encoding of the body fails
+	 * @throws \InvalidArgumentException when body cannot be prepared
 	 */
 	public function createRequest(string|Enum\Method $method, string|UriInterface $uri = '', array $headers = [], mixed $body = null): RequestInterface{
 		$method = $method instanceof Enum\Method ? $method->value : $method;
 
 		if($body !== null){
-			if(($body = $this->prepareBody($body, $headers)) === false){
-				throw new \LogicException('Failed to prepare the query body.');
-			}
+			$body = $this->prepareBody($body, $headers);
 		}
 		$stream = Message\Stream::create($body);
 
@@ -120,7 +119,8 @@ class RequestFactory{
 
 	/**
 	 * @param array<string, string|string[]> &$headers
-	 * @return string|resource|false|null
+	 * @return string|resource|null
+	 * @throws \JsonException when JSON encoding of the body fails
 	 * @throws \InvalidArgumentException when body cannot be prepared
 	 */
 	private function prepareBody(mixed $body, array &$headers): mixed{
@@ -134,7 +134,7 @@ class RequestFactory{
 				if($this->arrayHasCurlFile($body)){
 					throw new \InvalidArgumentException("Cannot prepare body with CURLFile, use raw 'CURLOPT_POSTFIELDS'.");
 				}elseif(str_contains($contentType, Enum\ContentType::Json->value)){
-					return json_encode($body);
+					return json_encode($body, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 				}else{
 					if($contentType === ''){
 						$headers['Content-Type'] = Enum\ContentType::Form->value;
@@ -147,7 +147,7 @@ class RequestFactory{
 					$headers['Content-Type'] = Enum\ContentType::Json->value;
 				}
 
-				return json_encode($body);
+				return json_encode($body, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 			case is_scalar($body):
 				return (string) $body;
 			case is_resource($body):

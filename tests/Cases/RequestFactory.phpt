@@ -73,7 +73,7 @@ final class RequestFactoryTest extends \Tester\TestCase{
 		Assert::same('POST', $request->getMethod());
 		Assert::same(ContentType::Json->value, $request->getHeaderLine('Content-Type'));
 		Assert::same(['bar'], $request->getHeader('Foo'));
-		Assert::same(json_encode($data), (string) $request->getBody());
+		Assert::same(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), (string) $request->getBody());
 	}
 
 	public function testPatch(): void{
@@ -95,7 +95,7 @@ final class RequestFactoryTest extends \Tester\TestCase{
 		Assert::same('PATCH', $request->getMethod());
 		Assert::same(ContentType::Json->value, $request->getHeaderLine('Content-Type'));
 		Assert::same(['bar'], $request->getHeader('foo'));
-		Assert::same(json_encode($data), (string) $request->getBody());
+		Assert::same(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), (string) $request->getBody());
 	}
 
 	public function testPut(): void{
@@ -117,7 +117,7 @@ final class RequestFactoryTest extends \Tester\TestCase{
 		Assert::same('PUT', $request->getMethod());
 		Assert::same(ContentType::Json->value, $request->getHeaderLine('Content-Type'));
 		Assert::same(['bar'], $request->getHeader('foo'));
-		Assert::same(json_encode($data), (string) $request->getBody());
+		Assert::same(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), (string) $request->getBody());
 	}
 
 	public function testDelete(): void{
@@ -142,7 +142,7 @@ final class RequestFactoryTest extends \Tester\TestCase{
 	public function testManualObjectBody(): void{
 		$object = new \stdClass;
 		$object->foo = 'bar';
-		$objectJson = json_encode($object);
+		$objectJson = json_encode($object, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 		$request = $this->factory->post('http://api.com', $object);
 		Assert::type(Request::class, $request);
@@ -185,16 +185,29 @@ final class RequestFactoryTest extends \Tester\TestCase{
 		);
 	}
 
-	public function testJsonEncodeFailure(): void{
+	public function testJsonEncodeUnsupportedType(): void{
 		$resource = \Znojil\Http\Internal\ResourceUtil::tryFopen('php://memory', 'r+');
 
 		Assert::exception(
 			fn() => $this->factory->postJson('http://api.com', ['data' => $resource]),
-			\LogicException::class,
-			'Failed to prepare the query body.'
+			\JsonException::class,
+			'Type is not supported'
 		);
 
 		fclose($resource);
+	}
+
+	public function testJsonUnescapedEncoding(): void{
+		$request = $this->factory->postJson('/api', ['name' => 'Novák', 'url' => 'https://example.com/path']);
+
+		Assert::same('{"name":"Novák","url":"https://example.com/path"}', (string) $request->getBody());
+	}
+
+	public function testJsonEncodeInvalidUtf8(): void{
+		Assert::exception(
+			fn() => $this->factory->postJson('/api', ['broken' => "\xB1\x31"]),
+			\JsonException::class
+		);
 	}
 
 }
