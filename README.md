@@ -76,6 +76,8 @@ $response = $client->sendRequest($factory->get('/users?limit=10'));
 // Requests: https://api.example.com/v1/users?limit=10
 ```
 
+> The client does not follow redirects by default (3xx responses are returned to the caller). Enable via `CURLOPT_FOLLOWLOCATION => true` in constructor or per-request options.
+
 #### RequestFactory Helper Methods
 
 The `RequestFactory` provides convenient methods for common HTTP operations:

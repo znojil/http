@@ -42,6 +42,9 @@ match(true){
 			'query' => $_GET
 		]);
 	})(),
+	$path === 'redirect' => (function (): void{
+		header('Location: /ping', true, 302);
+	})(),
 	default => (function (): void{
 		http_response_code(404);
 

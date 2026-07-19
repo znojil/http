@@ -14,7 +14,7 @@ class Client implements \Psr\Http\Client\ClientInterface{
 	/** @var array<int, mixed> */
 	private array $defaultCurlOptions = [
 		CURLOPT_CONNECTTIMEOUT => 10,
-		CURLOPT_FOLLOWLOCATION => true,
+		CURLOPT_FOLLOWLOCATION => false,
 		CURLOPT_HEADER => false,
 		CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
 		CURLOPT_SSL_VERIFYPEER => true,

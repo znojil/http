@@ -161,6 +161,23 @@ final class ClientTest extends \Tester\TestCase{
 		Assert::same('stream-data', $serverReceived['body']);
 	}
 
+	public function testRedirectNotFollowedByDefault(): void{
+		$client = new Client($this->server->getUrl());
+		$response = $client->sendRequest(new Request('GET', '/redirect'));
+
+		Assert::same(302, $response->getStatusCode());
+		Assert::same('/ping', $response->getHeaderLine('Location'));
+	}
+
+	public function testRedirectFollowedWhenEnabled(): void{
+		$client = new Client($this->server->getUrl(), [], [CURLOPT_FOLLOWLOCATION => true]);
+		$response = $client->sendRequest(new Request('GET', '/redirect'));
+
+		Assert::same(200, $response->getStatusCode());
+		Assert::same('pong', (string) $response->getBody());
+		Assert::same('', $response->getHeaderLine('Location'));
+	}
+
 }
 
 (new ClientTest)->run();
